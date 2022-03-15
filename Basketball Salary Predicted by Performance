@@ -1,0 +1,118 @@
+### First Model
+library(dplyr)
+library(ISLR)
+library(boot)
+library(caret)
+
+## creating the various linear models, including more variables for each model
+
+cv1 <-read.csv("Players Salaries 2010-2018 With Stats-Updated_No_blanks.csv") ##### pretend this is the training set
+cv2 <- as.data.frame(cv1)
+cv3 <- cv2[,-1:-6]
+cv3$index <- 1:nrow(cv3)
+
+set.seed(42)
+
+set <-createDataPartition(cv3$index, p=2/3, list=F)
+nrow(set)
+
+nrow(cv3)
+
+trainCV <-cv3[set,]
+testCV <-cv3[-set,]
+
+cv3$career_AST <- as.numeric(cv3$career_AST)
+cv3$career_PTS <- as.numeric(cv3$career_PTS)
+cv3$war_total <- as.numeric(cv3$war_total)
+cv3$career_FG3. <- as.numeric(cv3$career_FG3.)
+cv3$salary <- as.numeric(cv3$salary)
+cv3$career_TRB <- as.numeric(cv3$career_TRB)
+
+
+
+
+
+########## Fits for the first three linear models using the trainingcv3
+
+fit1 <- lm(salary ~ war_total + career_PTS, data=cv3)
+fit2 <- lm(salary ~ career_FG3. + career_AST + war_total + career_PTS, data=cv3)
+fit3 <- lm(salary ~ career_FG3. + career_AST + war_total + career_PTS + career_TRB, data=cv3)
+
+ControlParameters <- trainControl(method = "repeatedcv",
+                                  number = 10,
+                                  repeats = 10)
+
+
+fit1modeltest <-train(salary~war_total + career_PTS, data=trainCV,
+                  method = "lm",
+                  trControl = ControlParameters)
+
+fit2modeltest <-train(salary~career_FG3. + career_AST + war_total + career_PTS, data=trainCV,
+                  method = "lm",
+                  trControl = ControlParameters)
+
+fit3modeltest <-train(salary ~ career_FG3. + career_AST + war_total + career_PTS + career_TRB, data=trainCV,
+                  method = "lm",
+                  trControl = ControlParameters)
+fit1model
+#########
+fit2model
+#########
+fit3model
+
+##############
+
+
+fit1model <-train(salary~war_total + career_PTS, data=trainCV,
+                  method = "lm",
+                  trControl = ControlParameters)
+
+fit2model <-train(salary~career_FG3. + career_AST + war_total + career_PTS, data=trainCV,
+                  method = "lm",
+                  trControl = ControlParameters)
+
+fit3model <-train(salary ~ career_FG3. + career_AST + war_total + career_PTS + career_TRB, data=trainCV,
+                  method = "lm",
+                  trControl = ControlParameters)
+fit1model
+#########
+fit2model
+#########
+fit3model
+
+pred1 <- predict(fit1model, newdata = testCV)
+error <- pred1 - testCV$salary
+rmse1_Test <- sqrt(mean((error)^2,na.rm=TRUE))
+rmse1_Test
+
+
+
+pred2 <- predict(fit2model, newdata = testCV)
+error <- pred2 - testCV$salary
+rmse2_Test <- sqrt(mean((error)^2,na.rm=TRUE))
+rmse2_Test
+
+pred3 <- predict(fit3model, newdata = testCV)
+error <- pred3 - testCV$salary
+rmse3_Test <- sqrt(mean((error)^2,na.rm=TRUE))
+rmse3_Test
+
+####Test R Squared
+
+fit1modeltest <-train(salary~war_total + career_PTS, data=trainCV,
+                      method = "lm",
+                      trControl = ControlParameters)
+
+fit2modeltest <-train(salary~career_FG3. + career_AST + war_total + career_PTS, data=trainCV,
+                      method = "lm",
+                      trControl = ControlParameters)
+
+fit3modeltest <-train(salary ~ career_FG3. + career_AST + war_total + career_PTS + career_TRB, data=trainCV,
+                      method = "lm",
+                      trControl = ControlParameters)
+
+fit3modeltest
+#############
+fit2modeltest
+#############
+fit1modeltest
